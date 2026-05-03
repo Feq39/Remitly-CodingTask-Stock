@@ -3,8 +3,21 @@ package com.remitly.stocks.database.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="audit_logs")
+@Table(name = "audit_logs")
 public class AuditLog {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private long id;
+    @Column(name = "type_of_operation")
+    private String typeOfOperation;
+    @ManyToOne
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private Wallet wallet;
+    @ManyToOne
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
+
     public Wallet getWallet() {
         return wallet;
     }
@@ -36,18 +49,4 @@ public class AuditLog {
     public void setStock(Stock stock) {
         this.stock = stock;
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
-    @Column( name = "type_of_operation")
-    private String typeOfOperation;
-    @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
-
-    @ManyToOne
-    @JoinColumn(name = "stock_id", nullable = false)
-    private Stock stock;
 }

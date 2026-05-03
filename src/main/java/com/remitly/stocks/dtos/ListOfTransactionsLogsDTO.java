@@ -2,6 +2,5 @@ package com.remitly.stocks.dtos;
 
 import java.util.List;
 
-public class ListOfTransactionsLogsDTO {
-    public List<TransactionLogDTO> logs;
+public record ListOfTransactionsLogsDTO(List<TransactionLogDTO> log) {
 }

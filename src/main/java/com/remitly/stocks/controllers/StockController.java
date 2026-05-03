@@ -16,25 +16,27 @@ public class StockController {
     public StockController(StockService stockService) {
         this.stockService = stockService;
     }
+
     @GetMapping
     public ListOfStocksDTO getStateOfBank() {
         return stockService.getListOfAllBankStocks();
     }
+
     @PostMapping
     public void ChangeStockQuantity(@RequestBody ListOfStocksDTO listOfStocksDTO) {
         if (listOfStocksDTO == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"body is null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "body is null");
         }
-        if (listOfStocksDTO.stocks == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"list is null");
+        if (listOfStocksDTO.stocks() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "list is null");
         }
-        for(StockDTO stockDTO : listOfStocksDTO.stocks) {
-            if (stockDTO.quantity < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Negative Quantity not allowed");
+        for (StockDTO stockDTO : listOfStocksDTO.stocks()) {
+            if (stockDTO.quantity() < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Negative Quantity not allowed");
             }
         }
-        for(StockDTO stockDTO : listOfStocksDTO.stocks) {
-            stockService.SetStockQuantity(stockDTO.name,stockDTO.quantity);
+        for (StockDTO stockDTO : listOfStocksDTO.stocks()) {
+            stockService.SetStockQuantity(stockDTO.name(), stockDTO.quantity());
         }
     }
 

@@ -1,6 +1,4 @@
 package com.remitly.stocks.dtos;
 
-public class StockDTO {
-    public String name;
-    public long quantity;
+public record StockDTO(String name, long quantity) {
 }

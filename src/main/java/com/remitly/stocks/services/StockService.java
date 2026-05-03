@@ -3,7 +3,6 @@ package com.remitly.stocks.services;
 import com.remitly.stocks.database.entities.Stock;
 import com.remitly.stocks.database.entities.StockHolding;
 import com.remitly.stocks.database.entities.Wallet;
-import com.remitly.stocks.database.repositories.StockHoldingRepository;
 import com.remitly.stocks.database.repositories.StockRepository;
 import com.remitly.stocks.database.repositories.WalletRepository;
 import com.remitly.stocks.dtos.ListOfStocksDTO;
@@ -22,7 +21,8 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final WalletRepository walletRepository;
-    public StockService(StockRepository stockRepository,WalletRepository walletRepository) {
+
+    public StockService(StockRepository stockRepository, WalletRepository walletRepository) {
         this.stockRepository = stockRepository;
         this.walletRepository = walletRepository;
     }
@@ -33,24 +33,23 @@ public class StockService {
         for (Stock s : stockEntities) {
             stockDTOS.add(EntityToDtoConverter.getStockDTOFromStockEntity(s));
         }
-        ListOfStocksDTO result = new ListOfStocksDTO();
-        result.stocks = stockDTOS;
-        return result;
+        return new ListOfStocksDTO(stockDTOS);
     }
 
-    public Optional<Long> getAmountOfStockForWallet(String publicWalletId,String stockName) {
+    public Optional<Long> getAmountOfStockForWallet(String publicWalletId, String stockName) {
         Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
         if (walletOpt.isEmpty()) {
             return Optional.empty();
         }
-        Optional<StockHolding> result =  walletOpt.get().getHoldings().stream().filter(holding -> holding.getStock().getName().equals(stockName)).findFirst();
+        Optional<StockHolding> result = walletOpt.get().getHoldings().stream().filter(holding -> holding.getStock().getName().equals(stockName)).findFirst();
         return result.map(StockHolding::getStockAmount).or(() -> Optional.of(0L));
     }
+
     @Transactional
-    public void SetStockQuantity(String stockName,long quantity) {
+    public void SetStockQuantity(String stockName, long quantity) {
         Optional<Stock> stockOpt = stockRepository.findByName(stockName);
         Stock stock;
-        if(stockOpt.isPresent()) {
+        if (stockOpt.isPresent()) {
             stock = stockOpt.get();
         } else {
             stock = new Stock();

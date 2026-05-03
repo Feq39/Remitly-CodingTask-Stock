@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("logs")
 public class AuditLogsController {
     private final AuditLogsService auditLogsService;
+
     public AuditLogsController(AuditLogsService auditLogsService) {
         this.auditLogsService = auditLogsService;
     }
+
     @GetMapping
     public ListOfTransactionsLogsDTO getAllTransactionsLogs() {
         return auditLogsService.getAllLogs();

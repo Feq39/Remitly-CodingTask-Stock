@@ -7,8 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name="wallets")
+@Table(name = "wallets")
 public class Wallet {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private long id;
+    @Column(name = "public_wallet_id")
+    private String publicWalletId;
+    @OneToMany(mappedBy = "wallet")
+    private List<StockHolding> holdings = new ArrayList<>();
+
     public long getId() {
         return id;
     }
@@ -32,16 +41,6 @@ public class Wallet {
     public void setHoldings(List<StockHolding> holdings) {
         this.holdings = holdings;
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
-    private long id;
-    @Column(name="public_wallet_id")
-    private String publicWalletId;
-
-    @OneToMany(mappedBy = "wallet")
-    private List<StockHolding> holdings = new ArrayList<>();
 
 
 }

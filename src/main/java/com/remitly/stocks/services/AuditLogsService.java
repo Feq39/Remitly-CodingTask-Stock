@@ -20,22 +20,21 @@ public class AuditLogsService {
     private final AuditLogsRepository auditLogsRepository;
     private final WalletRepository walletRepository;
     private final StockRepository stockRepository;
-    public AuditLogsService(AuditLogsRepository auditLogsRepository,WalletRepository walletRepository, StockRepository stockRepository) {
+
+    public AuditLogsService(AuditLogsRepository auditLogsRepository, WalletRepository walletRepository, StockRepository stockRepository) {
         this.auditLogsRepository = auditLogsRepository;
         this.walletRepository = walletRepository;
         this.stockRepository = stockRepository;
     }
 
     public ListOfTransactionsLogsDTO getAllLogs() {
-        List<AuditLog> allLogs =  auditLogsRepository.findAll();
+        List<AuditLog> allLogs = auditLogsRepository.findAll();
         List<TransactionLogDTO> logsDTOS = allLogs.stream().map(EntityToDtoConverter::getTransactionLogDtoFromEntity).toList();
-        ListOfTransactionsLogsDTO result = new ListOfTransactionsLogsDTO();
-        result.logs = logsDTOS;
-        return result;
+        return new ListOfTransactionsLogsDTO(logsDTOS);
     }
 
     @Transactional
-    public void logTransaction(String publicWalletId,String stockName,String type) {
+    public void logTransaction(String publicWalletId, String stockName, String type) {
         AuditLog auditLog = new AuditLog();
         Wallet wallet = walletRepository.findByPublicWalletId(publicWalletId).orElseThrow();
         Stock stock = stockRepository.findByName(stockName).orElseThrow();

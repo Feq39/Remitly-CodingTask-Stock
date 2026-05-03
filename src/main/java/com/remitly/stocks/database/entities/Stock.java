@@ -1,10 +1,9 @@
 package com.remitly.stocks.database.entities;
 
 import jakarta.persistence.*;
-import org.springframework.stereotype.Component;
 
 @Entity
-@Table(name="stocks")
+@Table(name = "stocks")
 public class Stock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,6 +11,8 @@ public class Stock {
     private long id;
     @Column(name = "name")
     private String name;
+    @Column(name = "amount_left")
+    private long amountLeft;
 
     public long getId() {
         return id;
@@ -36,8 +37,5 @@ public class Stock {
     public void setAmountLeft(long amountLeft) {
         this.amountLeft = amountLeft;
     }
-
-    @Column(name = "amount_left")
-    private long amountLeft;
 
 }

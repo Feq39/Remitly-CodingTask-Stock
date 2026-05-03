@@ -1,7 +1,10 @@
 package com.remitly.stocks.dtos;
 
-public class TransactionLogDTO {
-    public String type;
-    public String walled_id;
-    public String stock_name;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record TransactionLogDTO(
+        String type,
+        @JsonProperty("wallet_id") String publicWalledId,
+        @JsonProperty("stock_name") String stockName
+) {
 }

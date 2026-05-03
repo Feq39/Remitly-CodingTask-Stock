@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StockHoldingRepository extends JpaRepository<StockHolding,Long> {
+public interface StockHoldingRepository extends JpaRepository<StockHolding, Long> {
     Optional<StockHolding> findByWalletAndStock(Wallet wallet, Stock stock);
 }

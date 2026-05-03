@@ -13,30 +13,20 @@ import java.util.List;
 
 public class EntityToDtoConverter {
     public static WalletDTO getWalletDTOFromWalletEntity(Wallet wallet) {
-        WalletDTO result = new WalletDTO();
+
         List<StockDTO> stocks = new ArrayList<>();
         for (StockHolding sh : wallet.getHoldings()) {
-            StockDTO stockDTO = new StockDTO();
-            stockDTO.name = sh.getStock().getName();
-            stockDTO.quantity = sh.getStockAmount();
+            StockDTO stockDTO = new StockDTO(sh.getStock().getName(), sh.getStockAmount());
             stocks.add(stockDTO);
         }
-        result.publicWalletId = wallet.getPublicWalletId();
-        result.stocks = stocks;
-        return result;
+        return new WalletDTO(wallet.getPublicWalletId(), stocks);
     }
+
     public static StockDTO getStockDTOFromStockEntity(Stock stock) {
-        StockDTO result = new StockDTO();
-        result.name = stock.getName();
-        result.quantity = stock.getAmountLeft();
-        return result;
+        return new StockDTO(stock.getName(), stock.getAmountLeft());
     }
 
     public static TransactionLogDTO getTransactionLogDtoFromEntity(AuditLog auditLog) {
-        TransactionLogDTO result = new TransactionLogDTO();
-        result.type = auditLog.getTypeOfOperation();
-        result.walled_id = auditLog.getWallet().getPublicWalletId();
-        result.stock_name = auditLog.getStock().getName();
-        return result;
+        return new TransactionLogDTO(auditLog.getTypeOfOperation(), auditLog.getWallet().getPublicWalletId(), auditLog.getStock().getName());
     }
 }

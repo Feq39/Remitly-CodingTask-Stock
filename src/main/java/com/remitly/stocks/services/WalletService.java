@@ -21,7 +21,8 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final StockRepository stockRepository;
     private final StockHoldingRepository stockHoldingRepository;
-    public WalletService(WalletRepository walletRepository,StockRepository stockRepository,StockHoldingRepository stockHoldingRepository) {
+
+    public WalletService(WalletRepository walletRepository, StockRepository stockRepository, StockHoldingRepository stockHoldingRepository) {
         this.walletRepository = walletRepository;
         this.stockRepository = stockRepository;
         this.stockHoldingRepository = stockHoldingRepository;
@@ -39,12 +40,12 @@ public class WalletService {
             return TransactionResult.STOCK_DOES_NOT_EXIST;
         }
         Stock stock = stockOpt.get();
-        if(stock.getAmountLeft() == 0) {
+        if (stock.getAmountLeft() == 0) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_BANK;
         }
         Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
         Wallet wallet;
-        if(walletOpt.isPresent()) {
+        if (walletOpt.isPresent()) {
             wallet = walletOpt.get();
         } else {
             wallet = new Wallet();
@@ -52,7 +53,7 @@ public class WalletService {
             wallet.setHoldings(new ArrayList<>());
             walletRepository.save(wallet);
         }
-        Optional <StockHolding> stockHoldingOpt = getHoldingOfStockFromWallet(wallet,stock);
+        Optional<StockHolding> stockHoldingOpt = getHoldingOfStockFromWallet(wallet, stock);
         StockHolding stockHolding;
         if (stockHoldingOpt.isEmpty()) {
             stockHolding = new StockHolding();
@@ -69,19 +70,20 @@ public class WalletService {
         stockHoldingRepository.save(stockHolding);
         return TransactionResult.SUCCESS;
     }
+
     @Transactional
-    public TransactionResult sellStockFromWallet(String publicWalletId,String stockName) {
+    public TransactionResult sellStockFromWallet(String publicWalletId, String stockName) {
         Optional<Stock> stockOpt = stockRepository.findByName(stockName);
         if (stockOpt.isEmpty()) {
             return TransactionResult.STOCK_DOES_NOT_EXIST;
         }
         Stock stock = stockOpt.get();
         Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
-        if(walletOpt.isEmpty()) {
+        if (walletOpt.isEmpty()) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_WALLET;
         }
         Wallet wallet = walletOpt.get();
-        Optional<StockHolding> holdingOpt = getHoldingOfStockFromWallet(wallet,stock);
+        Optional<StockHolding> holdingOpt = getHoldingOfStockFromWallet(wallet, stock);
         if (holdingOpt.isEmpty()) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_WALLET;
         }
@@ -96,7 +98,7 @@ public class WalletService {
         return TransactionResult.SUCCESS;
     }
 
-    private Optional<StockHolding>getHoldingOfStockFromWallet(Wallet wallet,Stock stock) {
+    private Optional<StockHolding> getHoldingOfStockFromWallet(Wallet wallet, Stock stock) {
         return wallet.getHoldings().stream().filter(holding -> holding.getStock().equals(stock)).findFirst();
     }
 }

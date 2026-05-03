@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="1" author="konrad.ciborowski">
+        <createTable tableName="wallets">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="public_wallet_id" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <createTable tableName="stocks">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount_left" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="stock_holdings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="stock_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_stock_holdings_stocks_id" references="stocks(id)"/>
+            </column>
+            <column name="wallet_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_stock_holdings_wallet_id" references="wallets(id)"/>
+            </column>
+            <column name="stock_amount" type="bigint">
+                <constraints nullable="false" unique="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="audit_logs">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="type_of_operation" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="stock_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_audit_logs_stocks_id" references="stocks(id)"/>
+            </column>
+            <column name="wallet_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_audit_logs_wallet_id" references="wallets(id)"/>
+            </column>
+
+
+        </createTable>
+
+    </changeSet>
+
+
+
+
+</databaseChangeLog>

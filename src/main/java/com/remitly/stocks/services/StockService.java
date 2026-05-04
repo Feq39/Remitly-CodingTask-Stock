@@ -46,10 +46,9 @@ public class StockService {
     }
 
     @Transactional
-    public void SetStockQuantity(String stockName, long quantity) { //if two concurrent requests try to set quantity and one of them fails on the stock creation,
-        //it is fine because if the bank is trying to set two different quantities at once, it does not matter to us either way
+    public void SetStockQuantity(String stockName, long quantity) {
 
-        Optional<Stock> stockOpt = stockRepository.findByName(stockName);
+        Optional<Stock> stockOpt = stockRepository.findWithLockingByName(stockName);
         Stock stock;
         if (stockOpt.isPresent()) {
             stock = stockOpt.get();

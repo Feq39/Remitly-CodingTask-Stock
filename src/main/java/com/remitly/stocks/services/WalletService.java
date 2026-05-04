@@ -3,13 +3,13 @@ package com.remitly.stocks.services;
 import com.remitly.stocks.database.entities.Stock;
 import com.remitly.stocks.database.entities.StockHolding;
 import com.remitly.stocks.database.entities.Wallet;
-import com.remitly.stocks.database.repositories.DatabaseInsertLockRepository;
 import com.remitly.stocks.database.repositories.StockHoldingRepository;
 import com.remitly.stocks.database.repositories.StockRepository;
 import com.remitly.stocks.database.repositories.WalletRepository;
 import com.remitly.stocks.dtos.WalletDTO;
 import com.remitly.stocks.serviceOperationStatuses.TransactionResult;
 import com.remitly.stocks.utils.EntityToDtoConverter;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +22,10 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final StockRepository stockRepository;
     private final StockHoldingRepository stockHoldingRepository;
-    private final DatabaseInsertLockRepository databaseInsertLockRepository;
-    private final long amountOfHashes;
-    public WalletService(WalletRepository walletRepository, StockRepository stockRepository, StockHoldingRepository stockHoldingRepository,DatabaseInsertLockRepository databaseInsertLockRepository) {
+    public WalletService(WalletRepository walletRepository, StockRepository stockRepository, StockHoldingRepository stockHoldingRepository) {
         this.walletRepository = walletRepository;
         this.stockRepository = stockRepository;
         this.stockHoldingRepository = stockHoldingRepository;
-        this.databaseInsertLockRepository = databaseInsertLockRepository;
-        this.amountOfHashes = databaseInsertLockRepository.count();
     }
 
     public Optional<WalletDTO> getWallet(String publicWalletId) {
@@ -37,17 +33,11 @@ public class WalletService {
         return wallet.map(EntityToDtoConverter::getWalletDTOFromWalletEntity);
     }
 
-    @Transactional
-    public void createWalletIfDoesNotExist(String publicWalletId) {
-        Wallet wallet = new Wallet();
-        wallet.setPublicWalletId(publicWalletId);
-        wallet.setHoldings(new ArrayList<>());
-        walletRepository.save(wallet);
-    }
+
 
     @Transactional
     public TransactionResult buyStockForWallet(String publicWalletId, String stockName) {
-        Optional<Stock> stockOpt = stockRepository.findByName(stockName);
+        Optional<Stock> stockOpt = stockRepository.findWithLockingByName(stockName);
         if (stockOpt.isEmpty()) {
             return TransactionResult.STOCK_DOES_NOT_EXIST;
         }
@@ -55,8 +45,7 @@ public class WalletService {
         if (stock.getAmountLeft() == 0) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_BANK;
         }
-        databaseInsertLockRepository.findById(getHashCode(publicWalletId));
-        Optional<Wallet> walletOpt = walletRepository.findWithLockingByPublicWalletId(publicWalletId);
+        Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
         Wallet wallet;
         if (walletOpt.isPresent()) {
             wallet = walletOpt.get();
@@ -64,7 +53,11 @@ public class WalletService {
             wallet = new Wallet();
             wallet.setPublicWalletId(publicWalletId);
             wallet.setHoldings(new ArrayList<>());
-            walletRepository.save(wallet);
+            try {
+                walletRepository.save(wallet);
+            } catch (DataIntegrityViolationException e) {
+                wallet = walletRepository.findByPublicWalletId(publicWalletId).orElseThrow();
+            }
         }
         Optional<StockHolding> stockHoldingOpt = getHoldingOfStockFromWallet(wallet, stock);
         StockHolding stockHolding;
@@ -86,13 +79,12 @@ public class WalletService {
 
     @Transactional
     public TransactionResult sellStockFromWallet(String publicWalletId, String stockName) {
-        Optional<Stock> stockOpt = stockRepository.findByName(stockName);
+        Optional<Stock> stockOpt = stockRepository.findWithLockingByName(stockName);
         if (stockOpt.isEmpty()) {
             return TransactionResult.STOCK_DOES_NOT_EXIST;
         }
         Stock stock = stockOpt.get();
-        databaseInsertLockRepository.findById(getHashCode(publicWalletId));
-        Optional<Wallet> walletOpt = walletRepository.findWithLockingByPublicWalletId(publicWalletId);
+        Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
         if (walletOpt.isEmpty()) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_WALLET;
         }
@@ -116,7 +108,4 @@ public class WalletService {
         return wallet.getHoldings().stream().filter(holding -> holding.getStock().equals(stock)).findFirst();
     }
 
-    private long getHashCode(String s) {
-        return Math.floorMod(s.hashCode(), amountOfHashes);
-    }
 }

@@ -54,22 +54,11 @@
 
 
         </createTable>
-        <createTable tableName="database_insert_lock">
-            <column name="id" type="bigint">
-                <constraints primaryKey="true"
-                             nullable="false"
-                             primaryKeyName="pk_database_insert_lock"/>
-            </column>
-        </createTable>
+
 
     </changeSet>
 
-    <changeSet id="2" author="konrad.ciborowski">
-        <sql>
-            INSERT INTO database_insert_lock(id)
-            SELECT generate_series(0, 999);
-        </sql>
-    </changeSet>
+
 
 
 </databaseChangeLog>

@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface StockRepository extends JpaRepository<Stock, Long> {
 
     Optional<Stock> findByName(String name);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Stock> findWithLockingByName(String name);
 }

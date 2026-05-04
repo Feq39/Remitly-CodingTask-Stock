@@ -8,6 +8,7 @@ import com.remitly.stocks.services.AuditLogsService;
 import com.remitly.stocks.services.StockService;
 import com.remitly.stocks.services.WalletService;
 import jakarta.validation.constraints.Size;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +59,10 @@ public class WalletController {
         }
         if (!operationTypeDTO.type().equals("sell") && !operationTypeDTO.type().equals("buy")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided operation type not supported");
+        }
+        try {
+            walletService.createWalletIfDoesNotExist(publicWalletId);
+        } catch (DataIntegrityViolationException _) {
         }
         TransactionResult transactionResult;
         if (operationTypeDTO.type().equals("buy")) {

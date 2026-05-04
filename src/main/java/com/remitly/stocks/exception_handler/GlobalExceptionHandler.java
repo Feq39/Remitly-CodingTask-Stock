@@ -11,7 +11,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class ConstraintViolationExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {ConstraintViolationException.class})
     protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException e, WebRequest request) {
@@ -19,7 +19,7 @@ public class ConstraintViolationExceptionHandler extends ResponseEntityException
     }
 
     @ExceptionHandler(value = {Exception.class})
-    protected ResponseEntity<Object> handleUncaughtExceptions(Exception e,WebRequest request) {
-        return handleExceptionInternal(e, "uncaught exception", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    protected ResponseEntity<Object> handleUncaughtExceptions(Exception e, WebRequest request) {
+        return handleExceptionInternal(e, "Technical error", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 }

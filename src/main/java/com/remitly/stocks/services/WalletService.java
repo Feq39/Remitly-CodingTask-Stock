@@ -11,6 +11,7 @@ import com.remitly.stocks.serviceOperationStatuses.TransactionResult;
 import com.remitly.stocks.utils.EntityToDtoConverter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final StockRepository stockRepository;
     private final StockHoldingRepository stockHoldingRepository;
+
     public WalletService(WalletRepository walletRepository, StockRepository stockRepository, StockHoldingRepository stockHoldingRepository) {
         this.walletRepository = walletRepository;
         this.stockRepository = stockRepository;
@@ -34,6 +36,19 @@ public class WalletService {
     }
 
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createWalletIfDoesNotExist(String publicWalletId) {
+
+        Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
+        Wallet wallet;
+        if (walletOpt.isEmpty()) {
+            wallet = new Wallet();
+            wallet.setPublicWalletId(publicWalletId);
+            wallet.setHoldings(new ArrayList<>());
+            walletRepository.saveAndFlush(wallet);
+        }
+    }
+
 
     @Transactional
     public TransactionResult buyStockForWallet(String publicWalletId, String stockName) {
@@ -45,19 +60,18 @@ public class WalletService {
         if (stock.getAmountLeft() == 0) {
             return TransactionResult.INSUFFICIENT_STOCK_QUANTITY_IN_BANK;
         }
+
         Optional<Wallet> walletOpt = walletRepository.findByPublicWalletId(publicWalletId);
         Wallet wallet;
         if (walletOpt.isPresent()) {
             wallet = walletOpt.get();
         } else {
-            wallet = new Wallet();
-            wallet.setPublicWalletId(publicWalletId);
-            wallet.setHoldings(new ArrayList<>());
             try {
-                walletRepository.save(wallet);
-            } catch (DataIntegrityViolationException e) {
-                wallet = walletRepository.findByPublicWalletId(publicWalletId).orElseThrow();
+                createWalletIfDoesNotExist(publicWalletId);
+            } catch (DataIntegrityViolationException _) {
+
             }
+            wallet = walletRepository.findByPublicWalletId(publicWalletId).orElseThrow();
         }
         Optional<StockHolding> stockHoldingOpt = getHoldingOfStockFromWallet(wallet, stock);
         StockHolding stockHolding;

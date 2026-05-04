@@ -13,7 +13,7 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    @Column(name = "public_wallet_id")
+    @Column(name = "public_wallet_id",unique = true)
     private String publicWalletId;
     @OneToMany(mappedBy = "wallet")
     private List<StockHolding> holdings = new ArrayList<>();

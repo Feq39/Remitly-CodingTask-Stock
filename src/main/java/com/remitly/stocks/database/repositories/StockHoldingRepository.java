@@ -10,5 +10,5 @@ import java.util.Optional;
 
 @Repository
 public interface StockHoldingRepository extends JpaRepository<StockHolding, Long> {
-    Optional<StockHolding> findByWalletAndStock(Wallet wallet, Stock stock);
+
 }
